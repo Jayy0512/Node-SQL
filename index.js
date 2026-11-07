@@ -1,12 +1,15 @@
-const { faker } = require('@faker-js/faker');
+const { faker } = require("@faker-js/faker");
+const express = require("express");
+const app = express();
+const mysql = require("mysql2"); // requiring MySQL
 
-const mysql = require('mysql2'); // requiring MySQL
+let port = 8080;
 
 const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  database: 'USER',
-  password: 'J@y$0513'
+  host: "localhost",
+  user: "root",
+  database: "USER",
+  password: "J@y$0513",
 });
 
 let getRandomUser = () => {
@@ -14,20 +17,37 @@ let getRandomUser = () => {
     faker.string.uuid(),
     faker.internet.username(),
     faker.internet.email(),
-    faker.internet.password()
+    faker.internet.password(),
   ];
-}
+};
+
+app.listen(port, () => {
+  console.log("Server is listening on port 8080");
+});
+
+app.get("/", (req, res) => {
+  let q = "SELECT count(*) FROM INFO";
+  try {
+    connection.query(q, (err, result) => {
+      if (err) throw err;
+      console.log(result[0]["count(*)"]);
+      res.send(result[0]);
+    });
+  } catch (err) {
+    res.send("Some error in DB");
+  }
+});
 
 // let q = "INSERT INTO INFO (id, username, email, password) VALUES (?, ?, ?, ?)";
 // let user = [["abc", "abc_0", "abc@mail", "abc_012"]];
 // would be, connection.query(q, users, (err, result) => {
 
-let q = "INSERT INTO INFO (id, username, email, password) VALUES ?";
+// let q = "INSERT INTO INFO (id, username, email, password) VALUES ?";
 
-let data = [];
-for(let i=0; i<=100; i++){
-  data.push(getRandomUser());
-}
+// let data = [];
+// for(let i=0; i<=100; i++){
+//   data.push(getRandomUser());
+// }
 
 // console.log(data);
 
@@ -35,16 +55,4 @@ for(let i=0; i<=100; i++){
 //              ["abc1", "abc_1", "abc1@mail", "abc1_012"],
 //              ["abc2", "abc_2", "abc2@mail", "abc2_012"]];
 
-try{
-  connection.query(q, [data], (err, result) => {
-    if (err) throw err;
-    console.log(result),
-    console.log(result[0]),
-    console.log(result.length);
-  })
-} catch(err) {
-  console.log(err);
-}
-
-connection.end();
-
+// connection.end();
