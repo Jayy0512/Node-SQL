@@ -3,7 +3,10 @@ const express = require("express");
 const app = express();
 const mysql = require("mysql2"); // requiring MySQL
 const path = require("path");
+const methodOverride = require("method-override");
 
+app.use(methodOverride("_method"));
+app.use(express.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "/views"));
 
@@ -53,6 +56,54 @@ app.get("/users", (req, res) => {
     connection.query(q, (err, users) => {
       if (err) throw err;
       res.render("showuser.ejs", { users });
+    });
+  } catch (err) {
+    res.send("Some error in DB");
+  }
+});
+
+// Edit route:
+
+app.get("/users/:id/edit", (req, res) => {
+  let { id } = req.params;
+  let q = `SELECT * FROM INFO WHERE id='${id}'`;
+  try {
+    connection.query(q, (err, result) => {
+      if (err) throw err;
+      // console.log(result);
+      let user = result[0];
+      res.render("edit.ejs", { user });
+    });
+  } catch (err) {
+    res.send("Some error in DB");
+  }
+});
+
+// Update route:
+
+app.patch("/users/:id", (req, res) => {
+  // res.send("Updated");
+  let { id } = req.params;
+  let q = `SELECT * FROM INFO WHERE id='${id}'`;
+  let { username: newUsername, password: formPass } = req.body;
+
+  try {
+    connection.query(q, (err, result) => {
+      if (err) throw err;
+      // console.log(result);
+      let user = result[0];
+      if (formPass != user.password) {
+        res.send("WRONG Password");
+      } else {
+        let q1 = `UPDATE INFO SET username='${newUsername}' WHERE id='${id}'`;
+        connection.query(q1, (err, result) => {
+          if (err) throw err;
+          // res.send(result);
+          res.redirect("/users");
+        });
+      }
+      // res.render("edit.ejs", { user });
+      // res.send(user);
     });
   } catch (err) {
     res.send("Some error in DB");
