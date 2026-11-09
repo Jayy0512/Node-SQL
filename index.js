@@ -29,6 +29,8 @@ app.listen(port, () => {
   console.log("Server is listening on port 8080");
 });
 
+// Home route:
+
 app.get("/", (req, res) => {
   let q = "SELECT count(*) FROM INFO";
   try {
@@ -37,6 +39,20 @@ app.get("/", (req, res) => {
       // console.log(result[0]["count(*)"]);
       let count = result[0]["count(*)"];
       res.render("home.ejs", { count });
+    });
+  } catch (err) {
+    res.send("Some error in DB");
+  }
+});
+
+// Show route:
+
+app.get("/users", (req, res) => {
+  let q = "SELECT * FROM INFO";
+  try {
+    connection.query(q, (err, users) => {
+      if (err) throw err;
+      res.render("showuser.ejs", { users });
     });
   } catch (err) {
     res.send("Some error in DB");
